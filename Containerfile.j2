@@ -1,0 +1,117 @@
+ARG BASE_VERSION=15
+ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
+
+# Builder stage
+FROM ghcr.io/daemonless/base:${BASE_VERSION} AS builder
+ARG UPSTREAM_URL
+
+RUN pkg update && pkg install -y \
+    rust \
+    node22 npm-node22 yarn-node22 \
+    git-lite jq pkgconf \
+    sqlite3 \
+    perl5 \
+    FreeBSD-clang FreeBSD-clang-dev FreeBSD-clibs-dev FreeBSD-toolchain \
+    FreeBSD-libexecinfo-dev FreeBSD-openssl-dev FreeBSD-runtime-dev FreeBSD-utilities-dev \
+    ca_root_nss && \
+    pkg clean -ay && \
+    rm -rf /var/cache/pkg/* /var/db/pkg/repos/*
+
+WORKDIR /build
+
+RUN --mount=type=secret,id=github_token \
+    FETCH_URL="${UPSTREAM_URL}"; \
+    GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || echo ""); \
+    if [ -n "${GITHUB_TOKEN}" ]; then \
+      FETCH_URL=$(echo "${UPSTREAM_URL}" | sed "s|https://|https://x-access-token:${GITHUB_TOKEN}@|"); \
+    fi && \
+    VERSION=$(fetch -qo - "${FETCH_URL}" | jq -r '.tag_name') && \
+    echo "Resolved STUMP_VERSION=${VERSION}" && \
+    git clone --depth 1 --branch ${VERSION} https://github.com/stumpapp/stump.git . && \
+    echo "${VERSION}" > /tmp/stump_version
+
+# Remove members not needed for server build, drop rust-toolchain.toml (no rustup)
+RUN sed -i '' '/core\/integration-tests/d' Cargo.toml && \
+    sed -i '' '/apps\/desktop\/src-tauri/d' Cargo.toml && \
+    rm -f rust-toolchain.toml
+
+# Build frontend
+# --ignore-scripts skips @parcel/watcher and @sentry/cli postinstalls which hang on FreeBSD
+# Call vite directly rather than through lerna (lerna hangs indefinitely on FreeBSD)
+RUN yarn install --frozen-lockfile --ignore-scripts && \
+    cd apps/web && node /build/node_modules/.bin/vite build
+
+# Build server binary
+RUN cargo build --package stump_server --bin stump_server --release && \
+    strip target/release/stump_server && \
+    cp target/release/stump_server /tmp/stump_server
+
+# Production image
+FROM ghcr.io/daemonless/base:${BASE_VERSION}
+
+ARG FREEBSD_ARCH=amd64
+ARG PACKAGES="sqlite3 ca_root_nss"
+ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
+ARG UPSTREAM_JQ=".tag_name"
+{%- if ports %}
+ARG HEALTHCHECK_ENDPOINT="http://localhost:{{ ports[0].port }}/api/v2/ping"
+{%- else %}
+ARG HEALTHCHECK_ENDPOINT="http://localhost:10801/api/v2/ping"
+{%- endif %}
+
+ENV HEALTHCHECK_URL="${HEALTHCHECK_ENDPOINT}"
+
+# --- Metadata (Injected by Generator) ---
+LABEL org.opencontainers.image.title="{{ title }}" \
+      org.opencontainers.image.description="{{ description }}" \
+      org.opencontainers.image.source="{{ repo_url }}" \
+      org.opencontainers.image.url="{{ web_url }}" \
+      org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.vendor="daemonless" \
+      org.opencontainers.image.authors="daemonless" \
+      io.daemonless.category="{{ category }}" \
+{%- if ports %}
+      io.daemonless.port="{{ ports[0].port }}" \
+{%- endif %}
+{%- if volumes %}
+      io.daemonless.volumes="{{ volumes | map(attribute='path') | join(',') }}" \
+{%- endif %}
+      io.daemonless.arch="${FREEBSD_ARCH}" \
+      io.daemonless.upstream-url="${UPSTREAM_URL}" \
+      io.daemonless.upstream-jq="${UPSTREAM_JQ}" \
+      io.daemonless.healthcheck-url="${HEALTHCHECK_ENDPOINT}" \
+      io.daemonless.packages="${PACKAGES}"
+
+RUN pkg update && pkg install -y ${PACKAGES} && \
+    pkg clean -ay && \
+    rm -rf /var/cache/pkg/* /var/db/pkg/repos/*
+
+COPY --from=builder /tmp/stump_server /app/stump
+COPY --from=builder /build/apps/web/dist /app/client
+COPY --from=builder /tmp/stump_version /app/version
+
+RUN mkdir -p /config && \
+    chown -R bsd:bsd /config && \
+    chmod 755 /app/stump && \
+    chmod -R 755 /app/client
+
+COPY root/ /
+
+RUN chmod +x /etc/services.d/stump/run /etc/cont-init.d/* 2>/dev/null || true
+
+ENV STUMP_CONFIG_DIR=/config \
+    STUMP_CLIENT_DIR=/app/client \
+    STUMP_PORT=10801 \
+    STUMP_IN_DOCKER=true \
+    API_VERSION=v1
+
+# --- Expose (Injected by Generator) ---
+{%- if ports %}
+EXPOSE {{ ports | map(attribute='port') | join(' ') }}
+{%- endif %}
+
+# --- Volumes (Injected by Generator) ---
+{%- if volumes %}
+VOLUME {{ volumes | map(attribute='path') | join(' ') }}
+{%- endif %}

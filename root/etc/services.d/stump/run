@@ -1,0 +1,4 @@
+#!/bin/sh
+s6-ready-when fetch -qo /dev/null http://localhost:10801/api/v2/ping
+
+exec s6-setuidgid bsd /app/stump

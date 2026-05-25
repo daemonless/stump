@@ -1,0 +1,41 @@
+name: stump
+
+x-daemonless:
+  title: "Stump"
+  icon: ":simple-bookstack:"
+  category: "Books"
+  description: "A free and open source comics, manga and digital book server with OPDS support."
+  upstream_url: "https://github.com/stumpapp/stump"
+  web_url: "https://stumpapp.dev"
+  user: "bsd"
+  mlock: false
+  appjail: true
+  community: "Discord:https://discord.gg/Kb9tkhecZT"
+
+  docs:
+    env:
+      PUID: "User ID for the application process"
+      PGID: "Group ID for the application process"
+      TZ: "Timezone for the container (e.g. America/New_York)"
+    volumes:
+      /config: "Configuration and database directory"
+      /data:
+        desc: "Media library (comics, manga, books)"
+        optional: true
+    ports:
+      10801: "Web UI"
+
+services:
+  stump:
+    image: ghcr.io/daemonless/stump:latest
+    container_name: stump
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - /path/to/containers/stump:/config
+      - /path/to/data:/data
+    ports:
+      - 10801:10801

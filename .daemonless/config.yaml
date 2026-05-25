@@ -1,0 +1,9 @@
+build:
+  variants:
+    - tag: latest
+      containerfile: Containerfile
+
+cit:
+  mode: screenshot
+  port: 10801
+  health: /api/v2/ping
