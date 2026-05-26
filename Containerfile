@@ -56,7 +56,7 @@ RUN cargo build --package stump_server --bin stump_server --release && \
 FROM ghcr.io/daemonless/base:${BASE_VERSION}
 
 ARG FREEBSD_ARCH=amd64
-ARG PACKAGES="sqlite3 ca_root_nss"
+ARG PACKAGES="sqlite3 ca_root_nss jpeg-turbo lcms2 icu openjpeg abseil"
 ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
 ARG UPSTREAM_JQ=".tag_name"
 ARG HEALTHCHECK_ENDPOINT="http://localhost:10801/api/v2/ping"
@@ -89,10 +89,17 @@ COPY --from=builder /tmp/stump_server /app/stump
 COPY --from=builder /build/apps/web/dist /app/client
 COPY --from=builder /tmp/stump_version /app/version
 
+# Install pre-built pdfium from daemonless/stump release
+ARG PDFIUM_PKG_HASH=9105928
+RUN fetch -qo /tmp/pdfium.pkg https://github.com/daemonless/stump/releases/download/pdfium-7746/pdfium-7746.pkg && \
+    pkg add /tmp/pdfium.pkg && \
+    rm /tmp/pdfium.pkg
+
 RUN mkdir -p /config && \
     chown -R bsd:bsd /config && \
     chmod 755 /app/stump && \
-    chmod -R 755 /app/client
+    chmod -R 755 /app/client && \
+    chmod 755 /usr/local/lib/libpdfium.so
 
 COPY root/ /
 
@@ -102,7 +109,8 @@ ENV STUMP_CONFIG_DIR=/config \
     STUMP_CLIENT_DIR=/app/client \
     STUMP_PORT=10801 \
     STUMP_IN_DOCKER=true \
-    API_VERSION=v1
+    API_VERSION=v1 \
+    PDFIUM_PATH=/usr/local/lib/libpdfium.so
 
 # --- Expose (Injected by Generator) ---
 EXPOSE 10801
