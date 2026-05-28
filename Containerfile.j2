@@ -20,15 +20,16 @@ RUN pkg update && pkg install -y \
 WORKDIR /build
 
 RUN --mount=type=secret,id=github_token \
-    FETCH_URL="${UPSTREAM_URL}"; \
-    GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || echo ""); \
+    GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || echo "") && \
     if [ -n "${GITHUB_TOKEN}" ]; then \
-      FETCH_URL=$(echo "${UPSTREAM_URL}" | sed "s|https://|https://x-access-token:${GITHUB_TOKEN}@|"); \
+      printf 'machine api.github.com login x-access-token password %s\n' "${GITHUB_TOKEN}" > /root/.netrc && \
+      chmod 600 /root/.netrc; \
     fi && \
-    VERSION=$(fetch -qo - "${FETCH_URL}" | jq -r '.tag_name') && \
+    VERSION=$(fetch -qo - "${UPSTREAM_URL}" | jq -r '.tag_name') && \
     echo "Resolved STUMP_VERSION=${VERSION}" && \
     git clone --depth 1 --branch ${VERSION} https://github.com/stumpapp/stump.git . && \
-    echo "${VERSION}" > /tmp/stump_version
+    echo "${VERSION}" > /tmp/stump_version && \
+    rm -f /root/.netrc
 
 # Remove members not needed for server build, drop rust-toolchain.toml (no rustup)
 RUN sed -i '' '/core\/integration-tests/d' Cargo.toml && \
