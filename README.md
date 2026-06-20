@@ -34,17 +34,17 @@ Before deploying, ensure your host environment is ready. See the [Quick Start Gu
 ```yaml
 services:
   stump:
-    image: ghcr.io/daemonless/stump:latest
+    image: "ghcr.io/daemonless/stump:latest"
     container_name: stump
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=UTC
+      - PUID=1000  # User ID for the application process
+      - PGID=1000  # Group ID for the application process
+      - TZ=UTC  # Timezone for the container (e.g. America/New_York)
     volumes:
       - "/path/to/containers/stump:/config"
       - "/path/to/containers/stump/data:/data" # optional
     ports:
-      - 10801:10801
+      - "10801:10801"
     restart: unless-stopped
 ```
 
@@ -114,7 +114,7 @@ podman run -d --name stump \
 - name: Deploy stump
   containers.podman.podman_container:
     name: stump
-    image: ghcr.io/daemonless/stump:latest
+    image: "ghcr.io/daemonless/stump:latest"
     state: started
     restart_policy: always
     env:
@@ -127,6 +127,8 @@ podman run -d --name stump \
       - "/path/to/containers/stump:/config"
       - "/path/to/containers/stump/data:/data" # optional
 ```
+
+Access at: `http://localhost:10801`
 
 ## Parameters
 

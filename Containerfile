@@ -4,7 +4,7 @@
 # Source: Containerfile.j2
 # --------------------------------------------------------------------------
 
-ARG BASE_VERSION=15
+ARG BASE_VERSION=15.1
 ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
 
 # Builder stage
@@ -15,6 +15,7 @@ RUN pkg update && pkg install -y \
     rust \
     node22 npm-node22 yarn-node22 \
     git-lite jq pkgconf \
+    cmake llvm \
     sqlite3 \
     perl5 \
     FreeBSD-clang FreeBSD-clang-dev FreeBSD-clibs-dev FreeBSD-toolchain \
