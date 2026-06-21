@@ -70,6 +70,7 @@ services:
     name: stump
     options:
       - container: 'boot args:--pull'
+      - expose="10801:10801 proto:tcp" \
     oci:
       user: root
       environment:
@@ -94,6 +95,7 @@ ARG tag=latest
 OPTION overwrite=force
 OPTION from=ghcr.io/daemonless/stump:${tag}
 ```
+**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Podman CLI
 
@@ -107,6 +109,24 @@ podman run -d --name stump \
   -v /path/to/containers/stump/data:/data # optional \
   ghcr.io/daemonless/stump:latest
 ```
+
+### AppJail
+
+```bash
+appjail oci run -Pd \
+  -o overwrite=force \
+  -o container="args:--pull" \
+  -o virtualnet=":<random> default" \
+  -o nat \
+  -o expose="10801:10801 proto:tcp" \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=UTC \
+  -o fstab="/path/to/containers/stump /config <pseudofs>" \
+  -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
+  ghcr.io/daemonless/stump:latest stump
+```
+**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Ansible
 
@@ -155,7 +175,7 @@ Access at: `http://localhost:10801`
 
 **Architectures:** amd64
 **User:** `bsd` (UID/GID via PUID/PGID, defaults to 1000:1000)
-**Base:** FreeBSD 15.0
+**Base:** FreeBSD 15.1
 
 ---
 
