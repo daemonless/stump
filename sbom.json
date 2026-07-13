@@ -1,11 +1,11 @@
 {
-  "generated": "2026-07-04T22:21:27Z",
+  "generated": "2026-07-13T23:43:51Z",
   "image": "stump",
   "tags": {
     "latest": {
       "app_version": "v0.1.5",
       "arch": "amd64",
-      "generated": "2026-07-04T22:20:12Z",
+      "generated": "2026-07-13T23:42:33Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -139,7 +139,7 @@
           },
           {
             "name": "ca_root_nss",
-            "version": "3.124"
+            "version": "3.125"
           },
           {
             "name": "execline",
@@ -159,15 +159,15 @@
           },
           {
             "name": "jq",
-            "version": "1.8.1"
+            "version": "1.8.2"
           },
           {
             "name": "lcms2",
-            "version": "2.19"
+            "version": "2.19.1"
           },
           {
             "name": "lerc",
-            "version": "4.0.0"
+            "version": "4.1.0"
           },
           {
             "name": "libdeflate",
@@ -175,7 +175,11 @@
           },
           {
             "name": "libedit",
-            "version": "3.1.20251016_1,1"
+            "version": "3.1.20260512,1"
+          },
+          {
+            "name": "liblz4",
+            "version": "1.10.0_2,1"
           },
           {
             "name": "oniguruma",
@@ -191,11 +195,11 @@
           },
           {
             "name": "pkg",
-            "version": "2.6.2_1"
+            "version": "2.7.5"
           },
           {
             "name": "png",
-            "version": "1.6.57"
+            "version": "1.6.58"
           },
           {
             "name": "s6",
@@ -207,7 +211,7 @@
           },
           {
             "name": "sqlite3",
-            "version": "3.50.4_2,1"
+            "version": "3.53.3,1"
           },
           {
             "name": "tiff",
@@ -215,7 +219,7 @@
           },
           {
             "name": "zstd",
-            "version": "1.5.7_1"
+            "version": "1.5.7_2"
           }
         ],
         "go": [],
@@ -229,7 +233,7 @@
       "source": "upstream",
       "summary": {
         "dotnet": 0,
-        "freebsd": 52,
+        "freebsd": 53,
         "go": 0,
         "java": 0,
         "node": 0,
@@ -237,7 +241,7 @@
         "python": 0,
         "ruby": 0,
         "rust": 0,
-        "total": 52
+        "total": 53
       }
     }
   }
