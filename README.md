@@ -5,15 +5,15 @@ Source: dbuild templates
 
 # Stump
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/stump-daemonless/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/stump-daemonless/actions)
-[![Last Commit](https://img.shields.io/github/last-commit/daemonless/stump-daemonless?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/stump-daemonless/commits)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/stump/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/stump/actions)
+[![Last Commit](https://img.shields.io/github/last-commit/daemonless/stump?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/stump/commits)
 
 A free and open source comics, manga and digital book server with OPDS support.
 
 | | |
 |---|---|
 | **Port** | 10801 |
-| **Registry** | `ghcr.io/jtrotsky/stump-daemonless` |
+| **Registry** | `ghcr.io/daemonless/stump` |
 | **Source** | [https://github.com/stumpapp/stump](https://github.com/stumpapp/stump) |
 | **Website** | [https://stumpapp.dev](https://stumpapp.dev) |
 
@@ -31,16 +31,17 @@ Before deploying, ensure your host environment is ready. See the [Quick Start Gu
 
 ```yaml
 services:
-  stump-daemonless:
-    image: "ghcr.io/jtrotsky/stump-daemonless:latest"
-    container_name: stump-daemonless
+  stump:
+    image: "ghcr.io/daemonless/stump:latest"
+    container_name: stump
     environment:
       - PUID=1000  # User ID for the application process
       - PGID=1000  # Group ID for the application process
       - TZ=UTC  # Timezone for the container (e.g. America/New_York)
+      - STUMP_TRUST_PROXY_HEADERS=  # Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly.
     volumes:
-      - "/path/to/containers/stump-daemonless:/config"
-      - "/path/to/containers/stump-daemonless/data:/data" # optional
+      - "/path/to/containers/stump:/config"
+      - "/path/to/containers/stump/data:/data" # optional
     ports:
       - "10801:10801"
     restart: unless-stopped
@@ -52,10 +53,11 @@ services:
 ```
 # .env
 
-DIRECTOR_PROJECT=stump-daemonless
+DIRECTOR_PROJECT=stump
 PUID=1000
 PGID=1000
 TZ=UTC
+STUMP_TRUST_PROXY_HEADERS=
 ```
 
 **appjail-director.yml**:
@@ -67,8 +69,8 @@ options:
   - virtualnet: ':<random> default'
   - nat:
 services:
-  stump-daemonless:
-    name: stump_daemonless
+  stump:
+    name: stump
     options:
       - container: 'boot args:--pull'
       - expose: '10801:10801 proto:tcp' \
@@ -78,14 +80,15 @@ services:
         - PUID: !ENV '${PUID}'
         - PGID: !ENV '${PGID}'
         - TZ: !ENV '${TZ}'
+        - STUMP_TRUST_PROXY_HEADERS: !ENV '${STUMP_TRUST_PROXY_HEADERS}'
     volumes:
-      - stump-daemonless: /config
-      - stump-daemonless_data: /data
+      - stump: /config
+      - stump_data: /data
 volumes:
-  stump-daemonless:
-    device: '/path/to/containers/stump-daemonless'
-  stump-daemonless_data:
-    device: '/path/to/containers/stump-daemonless/data'
+  stump:
+    device: '/path/to/containers/stump'
+  stump_data:
+    device: '/path/to/containers/stump/data'
 ```
 
 **Makejail**:
@@ -96,21 +99,22 @@ volumes:
 ARG tag=latest
 
 OPTION overwrite=force
-OPTION from=ghcr.io/jtrotsky/stump-daemonless:${tag}
+OPTION from=ghcr.io/daemonless/stump:${tag}
 ```
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Podman CLI
 
 ```bash
-podman run -d --name stump-daemonless \
+podman run -d --name stump \
   -p 10801:10801 \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
-  -v /path/to/containers/stump-daemonless:/config \
-  -v /path/to/containers/stump-daemonless/data:/data # optional \
-  ghcr.io/jtrotsky/stump-daemonless:latest
+  -e STUMP_TRUST_PROXY_HEADERS= \
+  -v /path/to/containers/stump:/config \
+  -v /path/to/containers/stump/data:/data # optional \
+  ghcr.io/daemonless/stump:latest
 ```
 
 ### AppJail
@@ -125,30 +129,32 @@ appjail oci run -Pd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
-  -o fstab="/path/to/containers/stump-daemonless /config <pseudofs>" \
-  -o fstab="/path/to/containers/stump-daemonless/data /data <pseudofs>" \ # optional
-  ghcr.io/jtrotsky/stump-daemonless:latest stump-daemonless
+  -e STUMP_TRUST_PROXY_HEADERS= \
+  -o fstab="/path/to/containers/stump /config <pseudofs>" \
+  -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
+  ghcr.io/daemonless/stump:latest stump
 ```
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Ansible
 
 ```yaml
-- name: Deploy stump-daemonless
+- name: Deploy stump
   containers.podman.podman_container:
-    name: stump-daemonless
-    image: "ghcr.io/jtrotsky/stump-daemonless:latest"
+    name: stump
+    image: "ghcr.io/daemonless/stump:latest"
     state: started
     restart_policy: always
     env:
       PUID: "1000"
       PGID: "1000"
       TZ: "UTC"
+      STUMP_TRUST_PROXY_HEADERS: ""
     ports:
       - "10801:10801"
     volumes:
-      - "/path/to/containers/stump-daemonless:/config"
-      - "/path/to/containers/stump-daemonless/data:/data" # optional
+      - "/path/to/containers/stump:/config"
+      - "/path/to/containers/stump/data:/data" # optional
 ```
 
 Access at: `http://localhost:10801`
@@ -162,6 +168,7 @@ Access at: `http://localhost:10801`
 | `PUID` | `1000` | User ID for the application process |
 | `PGID` | `1000` | Group ID for the application process |
 | `TZ` | `UTC` | Timezone for the container (e.g. America/New_York) |
+| `STUMP_TRUST_PROXY_HEADERS` | `` | Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly. |
 
 ### Volumes
 
