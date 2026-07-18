@@ -10,7 +10,7 @@ x-daemonless:
   user: "bsd"
   mlock: false
   appjail: true
-  community: "Discord:https://discord.gg/63Ybb7J3as"
+  community: "Discord:https://discord.gg/Kb9tkhecZT"
 
   docs:
     env:
