@@ -68,13 +68,13 @@ ENV HEALTHCHECK_URL="${HEALTHCHECK_ENDPOINT}"
 # --- Metadata (Injected by Generator) ---
 LABEL org.opencontainers.image.title="Stump" \
       org.opencontainers.image.description="A free and open source comics, manga and digital book server with OPDS support." \
-      org.opencontainers.image.source="https://github.com/daemonless/stump" \
+      org.opencontainers.image.source="https://github.com/daemonless/stump-daemonless" \
       org.opencontainers.image.url="https://stumpapp.dev" \
       org.opencontainers.image.documentation="https://stumpapp.dev/guides" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.vendor="daemonless" \
       org.opencontainers.image.authors="daemonless" \
-      io.daemonless.category="Books" \
+      io.daemonless.category="Media Servers" \
       io.daemonless.port="10801" \
       io.daemonless.volumes="/config,/data" \
       io.daemonless.arch="${FREEBSD_ARCH}" \

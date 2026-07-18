@@ -5,26 +5,24 @@ Source: dbuild templates
 
 # Stump
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/stump/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/stump/actions)
-[![Last Commit](https://img.shields.io/github/last-commit/daemonless/stump?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/stump/commits)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/stump-daemonless/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/stump-daemonless/actions)
+[![Last Commit](https://img.shields.io/github/last-commit/daemonless/stump-daemonless?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/stump-daemonless/commits)
 
 A free and open source comics, manga and digital book server with OPDS support.
 
 | | |
 |---|---|
 | **Port** | 10801 |
-| **Registry** | `ghcr.io/daemonless/stump` |
+| **Registry** | `ghcr.io/jtrotsky/stump-daemonless` |
 | **Source** | [https://github.com/stumpapp/stump](https://github.com/stumpapp/stump) |
 | **Website** | [https://stumpapp.dev](https://stumpapp.dev) |
 
 ## Version Tags
-
 | Tag | Description | Best For |
 | :--- | :--- | :--- |
 | `latest` | **Upstream Binary**. Built from official release. | Most users. Matches Linux Docker behavior. |
 
 ## Prerequisites
-
 Before deploying, ensure your host environment is ready. See the [Quick Start Guide](https://daemonless.io/guides/quick-start) for host setup instructions.
 
 ## Deployment
@@ -33,27 +31,28 @@ Before deploying, ensure your host environment is ready. See the [Quick Start Gu
 
 ```yaml
 services:
-  stump:
-    image: "ghcr.io/daemonless/stump:latest"
-    container_name: stump
+  stump-daemonless:
+    image: "ghcr.io/jtrotsky/stump-daemonless:latest"
+    container_name: stump-daemonless
     environment:
       - PUID=1000  # User ID for the application process
       - PGID=1000  # Group ID for the application process
       - TZ=UTC  # Timezone for the container (e.g. America/New_York)
     volumes:
-      - "/path/to/containers/stump:/config"
-      - "/path/to/containers/stump/data:/data" # optional
+      - "/path/to/containers/stump-daemonless:/config"
+      - "/path/to/containers/stump-daemonless/data:/data" # optional
     ports:
       - "10801:10801"
     restart: unless-stopped
 ```
 
 ### AppJail Director
-
 **.env**:
 
 ```
-DIRECTOR_PROJECT=stump
+# .env
+
+DIRECTOR_PROJECT=stump-daemonless
 PUID=1000
 PGID=1000
 TZ=UTC
@@ -62,15 +61,17 @@ TZ=UTC
 **appjail-director.yml**:
 
 ```yaml
+# appjail-director.yml
+
 options:
   - virtualnet: ':<random> default'
   - nat:
 services:
-  stump:
-    name: stump
+  stump-daemonless:
+    name: stump_daemonless
     options:
       - container: 'boot args:--pull'
-      - expose="10801:10801 proto:tcp" \
+      - expose: '10801:10801 proto:tcp' \
     oci:
       user: root
       environment:
@@ -78,36 +79,38 @@ services:
         - PGID: !ENV '${PGID}'
         - TZ: !ENV '${TZ}'
     volumes:
-      - stump: /config
-      - stump_data: /data
+      - stump-daemonless: /config
+      - stump-daemonless_data: /data
 volumes:
-  stump:
-    device: '/path/to/containers/stump'
-  stump_data:
-    device: '/path/to/containers/stump/data'
+  stump-daemonless:
+    device: '/path/to/containers/stump-daemonless'
+  stump-daemonless_data:
+    device: '/path/to/containers/stump-daemonless/data'
 ```
 
 **Makejail**:
 
 ```
+# Makejail
+
 ARG tag=latest
 
 OPTION overwrite=force
-OPTION from=ghcr.io/daemonless/stump:${tag}
+OPTION from=ghcr.io/jtrotsky/stump-daemonless:${tag}
 ```
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Podman CLI
 
 ```bash
-podman run -d --name stump \
+podman run -d --name stump-daemonless \
   -p 10801:10801 \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
-  -v /path/to/containers/stump:/config \
-  -v /path/to/containers/stump/data:/data # optional \
-  ghcr.io/daemonless/stump:latest
+  -v /path/to/containers/stump-daemonless:/config \
+  -v /path/to/containers/stump-daemonless/data:/data # optional \
+  ghcr.io/jtrotsky/stump-daemonless:latest
 ```
 
 ### AppJail
@@ -122,19 +125,19 @@ appjail oci run -Pd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
-  -o fstab="/path/to/containers/stump /config <pseudofs>" \
-  -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
-  ghcr.io/daemonless/stump:latest stump
+  -o fstab="/path/to/containers/stump-daemonless /config <pseudofs>" \
+  -o fstab="/path/to/containers/stump-daemonless/data /data <pseudofs>" \ # optional
+  ghcr.io/jtrotsky/stump-daemonless:latest stump-daemonless
 ```
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Ansible
 
 ```yaml
-- name: Deploy stump
+- name: Deploy stump-daemonless
   containers.podman.podman_container:
-    name: stump
-    image: "ghcr.io/daemonless/stump:latest"
+    name: stump-daemonless
+    image: "ghcr.io/jtrotsky/stump-daemonless:latest"
     state: started
     restart_policy: always
     env:
@@ -144,8 +147,8 @@ appjail oci run -Pd \
     ports:
       - "10801:10801"
     volumes:
-      - "/path/to/containers/stump:/config"
-      - "/path/to/containers/stump/data:/data" # optional
+      - "/path/to/containers/stump-daemonless:/config"
+      - "/path/to/containers/stump-daemonless/data:/data" # optional
 ```
 
 Access at: `http://localhost:10801`
@@ -179,4 +182,4 @@ Access at: `http://localhost:10801`
 
 ---
 
-Need help? Join our [Discord](https://discord.gg/Kb9tkhecZT) community.
+Need help? Join our [Discord](https://discord.gg/63Ybb7J3as) community.

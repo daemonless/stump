@@ -3,20 +3,21 @@ name: stump
 x-daemonless:
   title: "Stump"
   icon: ":simple-bookstack:"
-  category: "Books"
+  category: "Media Servers"
   description: "A free and open source comics, manga and digital book server with OPDS support."
   upstream_url: "https://github.com/stumpapp/stump"
   web_url: "https://stumpapp.dev"
   user: "bsd"
   mlock: false
   appjail: true
-  community: "Discord:https://discord.gg/Kb9tkhecZT"
+  community: "Discord:https://discord.gg/63Ybb7J3as"
 
   docs:
     env:
       PUID: "User ID for the application process"
       PGID: "Group ID for the application process"
       TZ: "Timezone for the container (e.g. America/New_York)"
+      STUMP_TRUST_PROXY_HEADERS: "Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly."
     volumes:
       /config: "Configuration and database directory"
       /data:
@@ -34,6 +35,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=UTC
+      # Uncomment when behind a reverse proxy so Stump builds correct
+      # absolute URLs (thumbnails, images) from X-Forwarded-* headers.
+      # Leave off if the port is exposed directly (avoids header spoofing).
+      # - STUMP_TRUST_PROXY_HEADERS=true
     volumes:
       - /path/to/containers/stump:/config
       - /path/to/data:/data
