@@ -189,4 +189,4 @@ Access at: `http://localhost:10801`
 
 ---
 
-Need help? Join our [Discord](https://discord.gg/63Ybb7J3as) community.
+Need help? Join our [Discord](https://discord.gg/Kb9tkhecZT) community.
