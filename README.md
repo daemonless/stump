@@ -18,13 +18,11 @@ A free and open source comics, manga and digital book server with OPDS support.
 | **Website** | [https://stumpapp.dev](https://stumpapp.dev) |
 
 ## Version Tags
-
 | Tag | Description | Best For |
 | :--- | :--- | :--- |
 | `latest` | **Upstream Binary**. Built from official release. | Most users. Matches Linux Docker behavior. |
 
 ## Prerequisites
-
 Before deploying, ensure your host environment is ready. See the [Quick Start Guide](https://daemonless.io/guides/quick-start) for host setup instructions.
 
 ## Deployment
@@ -40,6 +38,7 @@ services:
       - PUID=1000  # User ID for the application process
       - PGID=1000  # Group ID for the application process
       - TZ=UTC  # Timezone for the container (e.g. America/New_York)
+      - STUMP_TRUST_PROXY_HEADERS=  # Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly.
     volumes:
       - "/path/to/containers/stump:/config"
       - "/path/to/containers/stump/data:/data" # optional
@@ -49,19 +48,23 @@ services:
 ```
 
 ### AppJail Director
-
 **.env**:
 
 ```
+# .env
+
 DIRECTOR_PROJECT=stump
 PUID=1000
 PGID=1000
 TZ=UTC
+STUMP_TRUST_PROXY_HEADERS=
 ```
 
 **appjail-director.yml**:
 
 ```yaml
+# appjail-director.yml
+
 options:
   - virtualnet: ':<random> default'
   - nat:
@@ -70,13 +73,14 @@ services:
     name: stump
     options:
       - container: 'boot args:--pull'
-      - expose="10801:10801 proto:tcp" \
+      - expose: '10801:10801 proto:tcp' \
     oci:
       user: root
       environment:
         - PUID: !ENV '${PUID}'
         - PGID: !ENV '${PGID}'
         - TZ: !ENV '${TZ}'
+        - STUMP_TRUST_PROXY_HEADERS: !ENV '${STUMP_TRUST_PROXY_HEADERS}'
     volumes:
       - stump: /config
       - stump_data: /data
@@ -90,6 +94,8 @@ volumes:
 **Makejail**:
 
 ```
+# Makejail
+
 ARG tag=latest
 
 OPTION overwrite=force
@@ -105,6 +111,7 @@ podman run -d --name stump \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
+  -e STUMP_TRUST_PROXY_HEADERS= \
   -v /path/to/containers/stump:/config \
   -v /path/to/containers/stump/data:/data # optional \
   ghcr.io/daemonless/stump:latest
@@ -122,6 +129,7 @@ appjail oci run -Pd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=UTC \
+  -e STUMP_TRUST_PROXY_HEADERS= \
   -o fstab="/path/to/containers/stump /config <pseudofs>" \
   -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
   ghcr.io/daemonless/stump:latest stump
@@ -141,6 +149,7 @@ appjail oci run -Pd \
       PUID: "1000"
       PGID: "1000"
       TZ: "UTC"
+      STUMP_TRUST_PROXY_HEADERS: ""
     ports:
       - "10801:10801"
     volumes:
@@ -159,6 +168,7 @@ Access at: `http://localhost:10801`
 | `PUID` | `1000` | User ID for the application process |
 | `PGID` | `1000` | Group ID for the application process |
 | `TZ` | `UTC` | Timezone for the container (e.g. America/New_York) |
+| `STUMP_TRUST_PROXY_HEADERS` | `` | Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly. |
 
 ### Volumes
 
