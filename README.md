@@ -20,7 +20,7 @@ A free and open source comics, manga and digital book server with OPDS support.
 ## Version Tags
 | Tag | Description | Best For |
 | :--- | :--- | :--- |
-| `latest` | **Upstream Binary**. Built from official release. | Most users. Matches Linux Docker behavior. |
+| `latest` | **Upstream Binary**. Built from official release. | Most users — recommended. |
 
 ## Prerequisites
 Before deploying, ensure your host environment is ready. See the [Quick Start Guide](https://daemonless.io/guides/quick-start) for host setup instructions.
@@ -73,7 +73,7 @@ services:
     name: stump
     options:
       - container: 'boot args:--pull'
-      - expose: '10801:10801 proto:tcp' \
+      - expose: '10801:10801 proto:tcp'
     oci:
       user: root
       environment:
