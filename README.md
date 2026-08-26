@@ -44,8 +44,11 @@ services:
       - "/path/to/containers/stump/data:/data" # optional
     ports:
       - "10801:10801"
-    restart: unless-stopped
+    # always (not unless-stopped) so FreeBSD's podman rc.d auto-starts it at boot
+    restart: always
 ```
+
+Save as `compose.yaml`, then run `podman-compose up -d`.
 
 ### AppJail Director
 **.env**:
@@ -101,6 +104,9 @@ ARG tag=latest
 OPTION overwrite=force
 OPTION from=ghcr.io/daemonless/stump:${tag}
 ```
+
+Save the files above, then run `appjail-director up`.
+
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
 
 ### Podman CLI
@@ -116,6 +122,8 @@ podman run -d --name stump \
   -v /path/to/containers/stump/data:/data # optional \
   ghcr.io/daemonless/stump:latest
 ```
+
+Save as `run.sh`, then run `sh run.sh`.
 
 ### AppJail
 
@@ -134,7 +142,40 @@ appjail oci run -Pd \
   -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
   ghcr.io/daemonless/stump:latest stump
 ```
+
+Save as `run.sh`, then run `sh run.sh`.
+
 **Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
+
+### Bastille
+
+> [!WARNING]
+> Bastille's OCI support is **experimental**. It requires `buildah`, shares the host network stack (`inherit`), and persists image-declared volumes under `--data-path`.
+
+```yaml
+services:
+  stump:
+    image: "ghcr.io/daemonless/stump:latest"
+    container_name: stump
+    network_mode: host  # jail shares host networking
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - STUMP_TRUST_PROXY_HEADERS=
+```
+
+Save as `podman-compose.yml`, then run `bastille up`. Or via CLI:
+
+```bash
+bastille create -O \
+  --env PUID=1000 \
+  --env PGID=1000 \
+  --env TZ=UTC \
+  --env STUMP_TRUST_PROXY_HEADERS= \
+  --data-path /path/to/containers/stump \
+  stump ghcr.io/daemonless/stump:latest inherit
+```
 
 ### Ansible
 
@@ -156,6 +197,8 @@ appjail oci run -Pd \
       - "/path/to/containers/stump:/config"
       - "/path/to/containers/stump/data:/data" # optional
 ```
+
+Save as `stump-deploy.yaml`, then run `ansible-playbook stump-deploy.yaml`.
 
 Access at: `http://localhost:10801`
 
