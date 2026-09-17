@@ -7,6 +7,7 @@ Source: dbuild templates
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/stump/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/stump/actions)
 [![Last Commit](https://img.shields.io/github/last-commit/daemonless/stump?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/stump/commits)
+[![OCI Pulls](https://img.shields.io/docker/pulls/daemonless/stump?style=flat-square&label=OCI+Pulls&color=blue)](https://hub.docker.com/r/daemonless/stump)
 
 A free and open source comics, manga and digital book server with OPDS support.
 
@@ -75,7 +76,7 @@ services:
   stump:
     name: stump
     options:
-      - container: 'boot args:--pull'
+      - container: 'args:--pull'
       - expose: '10801:10801 proto:tcp'
     oci:
       user: root
@@ -101,13 +102,18 @@ volumes:
 
 ARG tag=latest
 
+OPTION container=boot
 OPTION overwrite=force
 OPTION from=ghcr.io/daemonless/stump:${tag}
 ```
 
 Save the files above, then run `appjail-director up`.
 
-**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
+
+> [!WARNING]
+> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
+>
+> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
 ### Podman CLI
 
@@ -127,6 +133,7 @@ Save as `run.sh`, then run `sh run.sh`.
 
 ### AppJail
 
+
 ```bash
 appjail oci run -Pd \
   -o overwrite=force \
@@ -143,29 +150,37 @@ appjail oci run -Pd \
   ghcr.io/daemonless/stump:latest stump
 ```
 
-Save as `run.sh`, then run `sh run.sh`.
+Save the files above, then run `sh run.sh`.
 
-**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
+
+> [!WARNING]
+> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
+>
+> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
 ### Bastille
 
 > [!WARNING]
-> Bastille's OCI support is **experimental**. It requires `buildah`, shares the host network stack (`inherit`), and persists image-declared volumes under `--data-path`.
+> Bastille's OCI support is **experimental**. It requires `buildah` and shares the host network stack (`inherit`). Mount volumes with `--volume HOST JAIL`; without it, image-declared volumes are stored under `${bastille_volumesdir}/${jail}`.
 
 ```yaml
 services:
   stump:
+    name: stump
     image: "ghcr.io/daemonless/stump:latest"
-    container_name: stump
-    network_mode: host  # jail shares host networking
+    network:
+      - mode: host
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=UTC
       - STUMP_TRUST_PROXY_HEADERS=
+    volumes:
+      - "/path/to/containers/stump:/config"
+      - "/path/to/containers/stump/data:/data"
 ```
 
-Save as `podman-compose.yml`, then run `bastille up`. Or via CLI:
+Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
 
 ```bash
 bastille create -O \
@@ -173,7 +188,8 @@ bastille create -O \
   --env PGID=1000 \
   --env TZ=UTC \
   --env STUMP_TRUST_PROXY_HEADERS= \
-  --data-path /path/to/containers/stump \
+  --volume /path/to/containers/stump /config \
+  --volume /path/to/containers/stump/data /data \
   stump ghcr.io/daemonless/stump:latest inherit
 ```
 
