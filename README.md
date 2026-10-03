@@ -41,8 +41,8 @@ services:
       - TZ=UTC  # Timezone for the container (e.g. America/New_York)
       - STUMP_TRUST_PROXY_HEADERS=  # Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly.
     volumes:
-      - "/path/to/containers/stump:/config"
-      - "/path/to/containers/stump/data:/data" # optional
+      - "/containers/stump:/config"
+      - "/containers/stump/data:/data" # optional
     ports:
       - "10801:10801"
     # always (not unless-stopped) so FreeBSD's podman rc.d auto-starts it at boot
@@ -90,9 +90,9 @@ services:
       - stump_data: /data
 volumes:
   stump:
-    device: '/path/to/containers/stump'
+    device: '/containers/stump'
   stump_data:
-    device: '/path/to/containers/stump/data'
+    device: '/containers/stump/data'
 ```
 
 **Makejail**:
@@ -108,49 +108,6 @@ OPTION from=ghcr.io/daemonless/stump:${tag}
 ```
 
 Save the files above, then run `appjail-director up`.
-
-
-> [!WARNING]
-> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
->
-> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
-
-### Podman CLI
-
-```bash
-podman run -d --name stump \
-  -p 10801:10801 \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=UTC \
-  -e STUMP_TRUST_PROXY_HEADERS= \
-  -v /path/to/containers/stump:/config \
-  -v /path/to/containers/stump/data:/data # optional \
-  ghcr.io/daemonless/stump:latest
-```
-
-Save as `run.sh`, then run `sh run.sh`.
-
-### AppJail
-
-
-```bash
-appjail oci run -Pd \
-  -o overwrite=force \
-  -o container="args:--pull" \
-  -o virtualnet=":<random> default" \
-  -o nat \
-  -o expose="10801:10801 proto:tcp" \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=UTC \
-  -e STUMP_TRUST_PROXY_HEADERS= \
-  -o fstab="/path/to/containers/stump /config <pseudofs>" \
-  -o fstab="/path/to/containers/stump/data /data <pseudofs>" \ # optional
-  ghcr.io/daemonless/stump:latest stump
-```
-
-Save the files above, then run `sh run.sh`.
 
 
 > [!WARNING]
@@ -176,45 +133,11 @@ services:
       - TZ=UTC
       - STUMP_TRUST_PROXY_HEADERS=
     volumes:
-      - "/path/to/containers/stump:/config"
-      - "/path/to/containers/stump/data:/data"
+      - "/containers/stump:/config"
+      - "/containers/stump/data:/data"
 ```
 
-Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
-
-```bash
-bastille create -O \
-  --env PUID=1000 \
-  --env PGID=1000 \
-  --env TZ=UTC \
-  --env STUMP_TRUST_PROXY_HEADERS= \
-  --volume /path/to/containers/stump /config \
-  --volume /path/to/containers/stump/data /data \
-  stump ghcr.io/daemonless/stump:latest inherit
-```
-
-### Ansible
-
-```yaml
-- name: Deploy stump
-  containers.podman.podman_container:
-    name: stump
-    image: "ghcr.io/daemonless/stump:latest"
-    state: started
-    restart_policy: always
-    env:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: "UTC"
-      STUMP_TRUST_PROXY_HEADERS: ""
-    ports:
-      - "10801:10801"
-    volumes:
-      - "/path/to/containers/stump:/config"
-      - "/path/to/containers/stump/data:/data" # optional
-```
-
-Save as `stump-deploy.yaml`, then run `ansible-playbook stump-deploy.yaml`.
+Save as `bastille-compose.yml`, then run `bastille up`.
 
 Access at: `http://localhost:10801`
 
