@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-11T16:05:50Z",
+  "generated": "2026-10-20T22:47:40Z",
   "image": "stump",
   "tags": {
     "latest": {
-      "app_version": "v0.1.10",
+      "app_version": "v0.1.11",
       "arch": "amd64",
-      "generated": "2026-10-11T16:05:05Z",
+      "generated": "2026-10-20T22:46:57Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -189,7 +189,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-runtime",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -238,7 +238,7 @@
               "PD"
             ],
             "name": "FreeBSD-zoneinfo",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -259,7 +259,7 @@
               "MPL20"
             ],
             "name": "ca_root_nss",
-            "version": "3.130"
+            "version": "3.131"
           },
           {
             "licenses": [

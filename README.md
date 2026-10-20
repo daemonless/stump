@@ -39,7 +39,7 @@ services:
       - PUID=1000  # User ID for the application process
       - PGID=1000  # Group ID for the application process
       - TZ=UTC  # Timezone for the container (e.g. America/New_York)
-      - STUMP_TRUST_PROXY_HEADERS=  # Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly.
+      # - STUMP_TRUST_PROXY_HEADERS=  # Trust X-Forwarded-* headers from a reverse proxy so image/thumbnail URLs use the correct scheme/host. Uncomment (=true) only when behind a proxy; leave off if the port is exposed directly.
     volumes:
       - "/containers/stump:/config"
       - "/containers/stump/data:/data" # optional
@@ -61,7 +61,6 @@ DIRECTOR_PROJECT=stump
 PUID=1000
 PGID=1000
 TZ=UTC
-STUMP_TRUST_PROXY_HEADERS=
 ```
 
 **appjail-director.yml**:
@@ -84,7 +83,6 @@ services:
         - PUID: !ENV '${PUID}'
         - PGID: !ENV '${PGID}'
         - TZ: !ENV '${TZ}'
-        - STUMP_TRUST_PROXY_HEADERS: !ENV '${STUMP_TRUST_PROXY_HEADERS}'
     volumes:
       - stump: /config
       - stump_data: /data
@@ -131,7 +129,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=UTC
-      - STUMP_TRUST_PROXY_HEADERS=
     volumes:
       - "/containers/stump:/config"
       - "/containers/stump/data:/data"
