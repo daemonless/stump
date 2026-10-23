@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-20T22:47:40Z",
+  "generated": "2026-10-23T09:10:21Z",
   "image": "stump",
   "tags": {
     "latest": {
       "app_version": "v0.1.11",
       "arch": "amd64",
-      "generated": "2026-10-20T22:46:57Z",
+      "generated": "2026-10-23T09:09:45Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -263,13 +263,6 @@
           },
           {
             "licenses": [
-              "ISCL"
-            ],
-            "name": "execline",
-            "version": "2.9.8.1"
-          },
-          {
-            "licenses": [
               "ICU"
             ],
             "name": "icu",
@@ -372,20 +365,6 @@
           },
           {
             "licenses": [
-              "ISCL"
-            ],
-            "name": "s6",
-            "version": "2.14.0.1"
-          },
-          {
-            "licenses": [
-              "ISCL"
-            ],
-            "name": "skalibs",
-            "version": "2.14.5.1"
-          },
-          {
-            "licenses": [
               "PD"
             ],
             "name": "sqlite3",
@@ -418,7 +397,7 @@
       "source": "upstream",
       "summary": {
         "dotnet": 0,
-        "freebsd": 56,
+        "freebsd": 53,
         "go": 0,
         "java": 0,
         "node": 0,
@@ -426,7 +405,7 @@
         "python": 0,
         "ruby": 0,
         "rust": 0,
-        "total": 56
+        "total": 53
       }
     }
   }
