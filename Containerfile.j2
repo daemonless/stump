@@ -2,7 +2,7 @@ ARG BASE_VERSION=15.1
 ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
 
 # Builder stage
-FROM ghcr.io/daemonless/base:${BASE_VERSION} AS builder
+FROM ghcr.io/daemonless/base-exec:${BASE_VERSION} AS builder
 ARG UPSTREAM_URL
 
 RUN pkg update && pkg install -y \
