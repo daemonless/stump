@@ -55,7 +55,7 @@ RUN cargo build --package stump_server --bin stump_server --release && \
     cp target/release/stump_server /tmp/stump_server
 
 # Production image
-FROM ghcr.io/daemonless/base:${BASE_VERSION}
+FROM ghcr.io/daemonless/base-exec:${BASE_VERSION}
 
 ARG FREEBSD_ARCH=amd64
 ARG PACKAGES="sqlite3 ca_root_nss jpeg-turbo lcms2 icu openjpeg abseil"
@@ -104,8 +104,9 @@ RUN mkdir -p /config && \
     chmod 755 /usr/local/lib/libpdfium.so
 
 COPY root/ /
+RUN chmod +x /daemonless/libexec/stump
 
-RUN chmod +x /etc/services.d/stump/run /etc/cont-init.d/* 2>/dev/null || true
+CMD ["/daemonless/libexec/stump"]
 
 ENV STUMP_CONFIG_DIR=/config \
     STUMP_CLIENT_DIR=/app/client \
