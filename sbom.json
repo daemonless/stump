@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-01T19:10:01Z",
+  "generated": "2026-11-04T19:45:30Z",
   "image": "stump",
   "tags": {
     "latest": {
       "app_version": "v0.1.12",
       "arch": "amd64",
-      "generated": "2026-11-01T19:09:22Z",
+      "generated": "2026-11-04T19:44:52Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -368,7 +368,7 @@
               "PD"
             ],
             "name": "sqlite3",
-            "version": "3.53.4,1"
+            "version": "3.54.1,1"
           },
           {
             "licenses": [
