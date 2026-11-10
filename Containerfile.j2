@@ -52,7 +52,7 @@ RUN cargo build --package stump_server --bin stump_server --release && \
 FROM ghcr.io/daemonless/base-exec:${BASE_VERSION}
 
 ARG FREEBSD_ARCH=amd64
-ARG PACKAGES="sqlite3 ca_root_nss jpeg-turbo lcms2 icu openjpeg abseil"
+ARG PACKAGES="sqlite3 ca_root_nss pdfium"
 ARG UPSTREAM_URL="https://api.github.com/repos/stumpapp/stump/releases/latest"
 ARG UPSTREAM_JQ=".tag_name"
 {%- if ports %}
@@ -92,12 +92,6 @@ RUN pkg update && pkg install -y ${PACKAGES} && \
 COPY --from=builder /tmp/stump_server /app/stump
 COPY --from=builder /build/apps/web/dist /app/client
 COPY --from=builder /tmp/stump_version /app/version
-
-# Install pre-built pdfium from daemonless/stump release
-ARG PDFIUM_PKG_HASH=9105928
-RUN fetch -qo /tmp/pdfium.pkg https://github.com/daemonless/stump/releases/download/pdfium-7746/pdfium-7746.pkg && \
-    pkg add /tmp/pdfium.pkg && \
-    rm /tmp/pdfium.pkg
 
 RUN mkdir -p /config && \
     chown -R bsd:bsd /config && \
