@@ -1,11 +1,11 @@
 {
-  "generated": "2026-11-04T19:45:30Z",
+  "generated": "2026-11-10T14:19:19Z",
   "image": "stump",
   "tags": {
     "latest": {
       "app_version": "v0.1.12",
       "arch": "amd64",
-      "generated": "2026-11-04T19:44:52Z",
+      "generated": "2026-11-10T14:18:41Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -249,24 +249,10 @@
           },
           {
             "licenses": [
-              "APACHE20"
-            ],
-            "name": "abseil",
-            "version": "20250127.1_2"
-          },
-          {
-            "licenses": [
               "MPL20"
             ],
             "name": "ca_root_nss",
             "version": "3.132"
-          },
-          {
-            "licenses": [
-              "ICU"
-            ],
-            "name": "icu",
-            "version": "76.1,1"
           },
           {
             "licenses": [
@@ -343,11 +329,11 @@
           },
           {
             "licenses": [
-              "APACHE20",
-              "BSD3CLAUSE"
+              "BSD3CLAUSE",
+              "APACHE20"
             ],
             "name": "pdfium",
-            "version": "7746"
+            "version": "8066"
           },
           {
             "licenses": [
@@ -397,7 +383,7 @@
       "source": "upstream",
       "summary": {
         "dotnet": 0,
-        "freebsd": 53,
+        "freebsd": 51,
         "go": 0,
         "java": 0,
         "node": 0,
@@ -405,7 +391,7 @@
         "python": 0,
         "ruby": 0,
         "rust": 0,
-        "total": 53
+        "total": 51
       }
     }
   }
